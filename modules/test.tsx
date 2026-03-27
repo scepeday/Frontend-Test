@@ -16,18 +16,45 @@ type Task = {
 };
 
 export default function TaskManager(): JSX.Element {
+    //States
     const [ title, setTitle ] = useState('');
     const [ priority, setPriority ] = useState<Priority>('Medium');
     const [tasks, setTasks] = useState<Task[]>([]);
     const [filter, setFilter] = useState<Filter>('All');
-    const [error, setError] = useState('');
+    const [error, setError] = useState(''); 
+
+    //Validation and Add-task logic
+    const handleAddTask = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+        setError('Please enter a task title.');
+        return;
+    }
+
+    const newTask: Task = {
+        id: Date.now(),
+        title: trimmedTitle,
+        priority,
+        completed: false,
+    };
+
+    setTasks((prevTasks) => [newTask, ...prevTasks]);
+
+    setTitle('');
+    setPriority('Medium');
+    setError('');
+    };
     
+    //Form UI
     return (
     <section className={styles.wrapper}>
         <div className={styles.card}>
         <h1 className={styles.heading}>Task Manager</h1>
 
-        <form className={styles.form}>
+        <form className={styles.form} onSubmit={handleAddTask}>
             <div className={styles.field}>
             <label htmlFor="task-title" className={styles.label}>
                 Task title
@@ -50,7 +77,10 @@ export default function TaskManager(): JSX.Element {
             <select
                 id="task-priority"
                 value={priority}
-                onChange={(event) => setPriority(event.target.value as Priority)}
+                onChange={(event) => {
+                    setTitle(event.target.value);
+                    if (error) setError('');
+                }}
                 className={styles.select}
             >
                 <option value="Low">Low</option>
