@@ -48,6 +48,19 @@ export default function TaskManager(): JSX.Element {
     setError('');
     };
     
+    //Complete and delete
+    const handleToggleComplete = (id: number) => {
+    setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+        )
+        );
+    };
+
+    const handleDeleteTask = (id: number) => {
+        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+    };
+    
     //Form UI
     return (
     <section className={styles.wrapper}>
@@ -63,7 +76,10 @@ export default function TaskManager(): JSX.Element {
                 id="task-title"
                 type="text"
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) => {
+                setTitle(event.target.value);
+                if (error) setError('');
+                }}
                 placeholder="Enter a task title"
                 className={styles.input}
             />
@@ -77,10 +93,7 @@ export default function TaskManager(): JSX.Element {
             <select
                 id="task-priority"
                 value={priority}
-                onChange={(event) => {
-                    setTitle(event.target.value);
-                    if (error) setError('');
-                }}
+                onChange={(event) => setPriority(event.target.value as Priority)}
                 className={styles.select}
             >
                 <option value="Low">Low</option>
@@ -93,6 +106,25 @@ export default function TaskManager(): JSX.Element {
             Add task
             </button>
         </form>
+
+        {tasks.length === 0 ? (
+            <p className={styles.emptyState}>No tasks yet.</p>
+        ) : (
+            <ul className={styles.taskList}>
+            {tasks.map((task) => (
+                <li key={task.id} className={styles.taskItem}>
+                <div className={styles.taskLeft}>
+                    <span className={styles.taskTitle}>{task.title}</span>
+                    <span className={styles.priorityBadge}>{task.priority}</span>
+                </div>
+
+                <button type="button" className={styles.deleteButton}>
+                    Delete
+                </button>
+                </li>
+            ))}
+            </ul>
+        )}
         </div>
     </section>
 );
