@@ -112,18 +112,35 @@ export default function TaskManager(): JSX.Element {
         ) : (
             <ul className={styles.taskList}>
             {tasks.map((task) => (
-                <li key={task.id} className={styles.taskItem}>
+                <li
+                key={task.id}
+                className={`${styles.taskItem} ${task.completed ? styles.completedTask : ''}`}
+                >
                 <div className={styles.taskLeft}>
+                    <input
+                    id={`task-${task.id}`}
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => handleToggleComplete(task.id)}
+                    className={styles.checkbox}
+                    />
+
+                    <label htmlFor={`task-${task.id}`} className={styles.taskLabel}>
                     <span className={styles.taskTitle}>{task.title}</span>
                     <span className={styles.priorityBadge}>{task.priority}</span>
+                    </label>
                 </div>
 
-                <button type="button" className={styles.deleteButton}>
+                <button
+                    type="button"
+                    className={styles.deleteButton}
+                    onClick={() => handleDeleteTask(task.id)}
+                >
                     Delete
                 </button>
                 </li>
             ))}
-            </ul>
+        </ul>
         )}
         </div>
     </section>
