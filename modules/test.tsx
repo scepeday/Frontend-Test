@@ -61,6 +61,17 @@ export default function TaskManager(): JSX.Element {
         setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
     };
     
+    //Filters and organized task list
+    const filteredTasks = tasks.filter((task) => {
+        if (filter === 'Active') return !task.completed;
+        if (filter === 'Completed') return task.completed;
+        return true;
+    });
+
+const activeTasks = filteredTasks.filter((task) => !task.completed);
+const completedTasks = filteredTasks.filter((task) => task.completed);
+const visibleTasks = [...activeTasks, ...completedTasks];
+
     //Form UI
     return (
     <section className={styles.wrapper}>
@@ -106,12 +117,38 @@ export default function TaskManager(): JSX.Element {
             Add task
             </button>
         </form>
+        
+        <div className={styles.filters}>
+            <button
+                type="button"
+                className={`${styles.filterButton} ${filter === 'All' ? styles.activeFilter : ''}`}
+                onClick={() => setFilter('All')}
+            >
+                All
+            </button>
 
-        {tasks.length === 0 ? (
+            <button
+                type="button"
+                className={`${styles.filterButton} ${filter === 'Active' ? styles.activeFilter : ''}`}
+                onClick={() => setFilter('Active')}
+            >
+                Active
+            </button>
+
+            <button
+                type="button"
+                className={`${styles.filterButton} ${filter === 'Completed' ? styles.activeFilter : ''}`}
+                onClick={() => setFilter('Completed')}
+            >
+                Completed
+            </button>
+        </div>
+
+        {visibleTasks.length === 0 ? (
             <p className={styles.emptyState}>No tasks yet.</p>
         ) : (
             <ul className={styles.taskList}>
-            {tasks.map((task) => (
+            {visibleTasks.map((task) => (
                 <li
                 key={task.id}
                 className={`${styles.taskItem} ${task.completed ? styles.completedTask : ''}`}
