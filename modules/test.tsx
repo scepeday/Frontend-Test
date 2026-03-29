@@ -1,7 +1,7 @@
 'use client'
 import React from 'react';
 import styles from './test.module.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Your Test Starts Here
 
@@ -21,7 +21,20 @@ export default function TaskManager(): JSX.Element {
     const [ priority, setPriority ] = useState<Priority>('Medium');
     const [tasks, setTasks] = useState<Task[]>([]);
     const [filter, setFilter] = useState<Filter>('All');
-    const [error, setError] = useState(''); 
+    const [error, setError] = useState('');
+    useEffect(() => {
+        const savedTasks = localStorage.getItem('tasks');
+
+        if (savedTasks) {
+            setTasks(JSON.parse(savedTasks));
+        }
+        }, []);
+
+    useEffect(() => {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }, [tasks]);
+
+    const [searchTerm, setSearchTerm] = useState('');
 
     //Validation and Add-task logic
     const handleAddTask = (event: React.FormEvent<HTMLFormElement>) => {
@@ -63,14 +76,23 @@ export default function TaskManager(): JSX.Element {
     
     //Filters and organized task list
     const filteredTasks = tasks.filter((task) => {
-        if (filter === 'Active') return !task.completed;
-        if (filter === 'Completed') return task.completed;
-        return true;
+    const matchesStatus =
+        filter === 'All'
+        ? true
+        : filter === 'Active'
+        ? !task.completed
+        : task.completed;
+
+    const matchesSearch = task.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    return matchesStatus && matchesSearch;
     });
 
-const activeTasks = filteredTasks.filter((task) => !task.completed);
-const completedTasks = filteredTasks.filter((task) => task.completed);
-const visibleTasks = [...activeTasks, ...completedTasks];
+    const activeTasks = filteredTasks.filter((task) => !task.completed);
+    const completedTasks = filteredTasks.filter((task) => task.completed);
+    const visibleTasks = [...activeTasks, ...completedTasks];
 
     //Form UI
     return (
@@ -117,6 +139,20 @@ const visibleTasks = [...activeTasks, ...completedTasks];
             Add task
             </button>
         </form>
+        
+        <div className={styles.field}>
+            <label htmlFor="task-search" className={styles.label}>
+                Search tasks
+            </label>
+            <input
+                id="task-search"
+                type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search by title"
+                className={styles.input}
+            />
+        </div>
         
         <div className={styles.filters}>
             <button
